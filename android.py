@@ -4,14 +4,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
-
+# Desired capabilities for Appium
 desired_caps = {
-    "deviceName": "Galaxy S20",
+    "deviceName": "Galaxy S22 Ultra 5G",
     "platformName": "Android",
-    "platformVersion": "10",
-    "app": "lt://proverbial-android",  # Enter app_url here
+    "platformVersion": "12",
+    "app": "lt://APP10160351951731828750346119",  # Enter app_url here
     "isRealMobile": True,
-    "build": "Python Vanilla Android",
+    "build": "Flutter",
     "name": "Sample Test - Python",
     "network": False,
     "visual": True,
@@ -20,68 +20,38 @@ desired_caps = {
 
 
 def startingTest():
-    if os.environ.get("LT_USERNAME") is None:
-        # Enter LT username here if environment variables have not been added
-        username = "username"
-    else:
-        username = os.environ.get("LT_USERNAME")
-    if os.environ.get("LT_ACCESS_KEY") is None:
-        # Enter LT accesskey here if environment variables have not been added
-        accesskey = "accesskey"
-    else:
-        accesskey = os.environ.get("LT_ACCESS_KEY")
+    # Retrieve LambdaTest credentials from environment variables or hardcode them
+    username = os.environ.get("LT_USERNAME", "sarthakt")  # Replace with your username
+    accesskey = os.environ.get("LT_ACCESS_KEY", "sLBGRpVZ6NeHd8etRYHC8ajGZTzHORXJy7pL08q5XNxxp1okT0")  # Replace with your access key
 
     try:
-        driver = webdriver.Remote(desired_capabilities=desired_caps, command_executor="https://" +
-                                  username+":"+accesskey+"@mobile-hub.lambdatest.com/wd/hub")
-        colorElement = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/color")))
-        colorElement.click()
+        # Initialize Appium driver
+        driver = webdriver.Remote(
+            command_executor=f"https://{username}:{accesskey}@mobile-hub.lambdatest.com/wd/hub",
+            desired_capabilities=desired_caps
+        )
 
-        textElement = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((MobileBy.ID, "com.lambdatest.proverbial:id/Text")))
-        textElement.click()
+        # Execute the 'flutter:waitFor' script to wait for the element
+        driver.execute_script("flutter:waitFor", [
+            "eyJmaW5kZXJUeXBlIjoiQnlUZXh0IiwidGV4dCI6IkVtcGxveWVlIGNvdW50cnkifQ==", 
+            20000  # Wait timeout in milliseconds
+        ])
 
-        toastElement = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/toast")))
-        toastElement.click()
+        # Wait until the element is clickable
+        wait = WebDriverWait(driver, 20)  # Timeout in seconds
+        employee_country = wait.until(
+            EC.element_to_be_clickable((MobileBy.XPATH, "//*[@content-desc='Employee country']"))
+        )
 
-        notification = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/notification")))
-        notification.click()
+        # Click the element
+        employee_country.click()
 
-        geolocation = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/geoLocation")))
-        geolocation.click()
-        time.sleep(5)
-
-        driver.back()
-
-        home = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/buttonPage")))
-        home.click()
-
-        speedTest = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/speedTest")))
-        speedTest.click()
-        time.sleep(5)
-
-        driver.back()
-
-        browser = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/webview")))
-        browser.click()
-
-        url = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/url")))
-        url.send_keys("https://www.lambdatest.com")
-
-        find = WebDriverWait(driver, 20).until(EC.element_to_be_clickable(
-            (MobileBy.ID, "com.lambdatest.proverbial:id/find")))
-        find.click()
+        # Quit the driver
         driver.quit()
-    except:
+    except Exception as e:
+        print(f"An error occurred: {e}")
         driver.quit()
 
 
+# Start the test
 startingTest()
